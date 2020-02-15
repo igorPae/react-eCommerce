@@ -3,13 +3,13 @@ import 'firebase/firestore';
 import 'firebase/auth';
 
 const config = {
-    apiKey: "AIzaSyBvMOIIFGik4NNJwvZlrBUhDhA096dJdUs",
-    authDomain: "e-commerce-ec30f.firebaseapp.com",
-    databaseURL: "https://e-commerce-ec30f.firebaseio.com",
-    projectId: "e-commerce-ec30f",
-    storageBucket: "e-commerce-ec30f.appspot.com",
-    messagingSenderId: "381679158426",
-    appId: "1:381679158426:web:6faf37054dd503b7b38b23"
+  apiKey: "AIzaSyBvMOIIFGik4NNJwvZlrBUhDhA096dJdUs",
+  authDomain: "e-commerce-ec30f.firebaseapp.com",
+  databaseURL: "https://e-commerce-ec30f.firebaseio.com",
+  projectId: "e-commerce-ec30f",
+  storageBucket: "e-commerce-ec30f.appspot.com",
+  messagingSenderId: "381679158426",
+  appId: "1:381679158426:web:6faf37054dd503b7b38b23"
 };
 
 firebase.initializeApp(config);
@@ -37,6 +37,39 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
   }
 
   return userRef;
+};
+
+export const addCollectionAndDocuments = async (
+  collectionKey,
+  objectsToAdd
+) => {
+  const collectionRef = firestore.collection(collectionKey);
+
+  const batch = firestore.batch();
+  objectsToAdd.forEach(obj => {
+    const newDocRef = collectionRef.doc();
+    batch.set(newDocRef, obj);
+  });
+
+  return await batch.commit();
+};
+
+export const convertCollectionsSnapshotToMap = collections => {
+  const transformedCollection = collections.docs.map(doc => {
+    const { title, items } = doc.data();
+
+    return {
+      routeName: encodeURI(title.toLowerCase()),
+      id: doc.id,
+      title,
+      items
+    };
+  });
+
+  return transformedCollection.reduce((accumulator, collection) => {
+    accumulator[collection.title.toLowerCase()] = collection;
+    return accumulator;
+  }, {});
 };
 
 export const auth = firebase.auth();
